@@ -27,3 +27,8 @@ jobs:
           iverilog -g2012 -o sim/build/test_control \
             rtl/core/control.v tb/core/test_control.v
           vvp sim/build/test_control
+      - name: Compile and run immediate-generator test
+        run: |
+          iverilog -g2012 -o sim/build/test_imm_gen \
+            rtl/core/imm_gen.v tb/core/test_imm_gen.v
+          vvp sim/build/test_imm_gen

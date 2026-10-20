@@ -64,3 +64,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Focused unit tests for arithmetic, `x0`, little-endian loads/stores, sign/zero extension, and taken branches
 - Initial Verilog ALU and register-file RTL with a self-checking simulator testbench
 - Combinational RV32I control decoder with memory, branch, jump, immediate, and write-back controls
+- Immediate generator covering I, S, B, U, and J instruction formats
