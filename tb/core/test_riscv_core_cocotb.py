@@ -170,3 +170,49 @@ async def test_core_randomized_differential(dut):
     assert int(dut.register_file.registers[0].value) == 0
     for address in touched_addresses:
         assert int(dut.data_memory.memory[address].value) == model.memory[address]
+
+
+@cocotb.test()
+async def test_core_control_flow_and_upper_immediates(dut):
+    program = [
+        i_type(5, 0, 0, 1),
+        i_type(5, 0, 0, 2),
+        b_type(8, 2, 1, 0),
+        i_type(99, 0, 0, 10),
+        b_type(8, 2, 1, 1),
+        i_type(1, 0, 0, 10),
+        i_type(7, 0, 0, 3),
+        i_type(8, 0, 0, 4),
+        b_type(8, 4, 3, 4),
+        i_type(99, 0, 0, 11),
+        b_type(8, 3, 4, 5),
+        i_type(98, 0, 0, 11),
+        b_type(8, 4, 3, 6),
+        i_type(97, 0, 0, 11),
+        b_type(8, 3, 4, 7),
+        i_type(96, 0, 0, 11),
+        u_type(0x12345000, 5, 0x37),
+        u_type(0x00001000, 6, 0x17),
+        i_type(84, 0, 0, 8),
+        i_type(0, 8, 0, 9, 0x67),
+        i_type(99, 0, 0, 12),
+        i_type(98, 0, 0, 12),
+        i_type(7, 0, 0, 12),
+        0x0000006F,
+    ]
+    model = RV32IModel(program)
+    clock = Clock(dut.clk, 10, units="ns")
+    cocotb.start_soon(clock.start())
+    await write_program(dut, program)
+    dut.reset.value = 1
+    await Timer(12, units="ns")
+    dut.reset.value = 0
+
+    for _ in range(30):
+        model.step()
+        await RisingEdge(dut.clk)
+
+    await Timer(1, units="ns")
+    for register in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12):
+        actual = int(dut.register_file.registers[register].value)
+        assert actual == model.registers[register], f"x{register}: {actual:#x} != {model.registers[register]:#x}"
