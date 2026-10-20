@@ -1,0 +1,34 @@
+# Simulation output
+sim/build/
+sim/*.vcd
+sim/*.fst
+sim/*.log
+
+# Python cache and environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Cocotb
+cocotb_build/
+
+# Verilator
+obj_dir/
+verilator_*
+
+# FPGA and synthesis output
+build/
+out/
+*.rpt
+*.json
+*.bit
+*.bin
+*.dcp
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
