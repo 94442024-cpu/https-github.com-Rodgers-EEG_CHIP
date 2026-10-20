@@ -1,0 +1,24 @@
+name: RTL CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install RTL simulator
+        run: sudo apt-get update && sudo apt-get install --yes iverilog
+      - name: Run Python golden-model tests
+        run: python -m unittest discover -s models/golden -p 'test_*.py' -v
+      - name: Compile and run RTL unit test
+        run: |
+          mkdir -p sim/build
+          iverilog -g2012 -o sim/build/test_alu_regfile \
+            rtl/core/alu.v rtl/core/regfile.v tb/core/test_alu_regfile.v
+          vvp sim/build/test_alu_regfile
