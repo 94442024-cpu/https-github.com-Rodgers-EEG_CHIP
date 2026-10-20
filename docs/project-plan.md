@@ -65,3 +65,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Initial Verilog ALU and register-file RTL with a self-checking simulator testbench
 - Combinational RV32I control decoder with memory, branch, jump, immediate, and write-back controls
 - Immediate generator covering I, S, B, U, and J instruction formats
+- Separate instruction/data memories and an integrated single-cycle `riscv_core` smoke-test target

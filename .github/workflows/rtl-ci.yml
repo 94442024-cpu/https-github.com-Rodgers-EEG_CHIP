@@ -32,3 +32,10 @@ jobs:
           iverilog -g2012 -o sim/build/test_imm_gen \
             rtl/core/imm_gen.v tb/core/test_imm_gen.v
           vvp sim/build/test_imm_gen
+      - name: Compile and run core smoke test
+        run: |
+          iverilog -g2012 -o sim/build/test_riscv_core \
+            rtl/core/alu.v rtl/core/regfile.v rtl/core/control.v \
+            rtl/core/imm_gen.v rtl/core/instr_mem.v rtl/core/data_mem.v \
+            rtl/core/riscv_core.v tb/core/test_riscv_core.v
+          vvp sim/build/test_riscv_core
