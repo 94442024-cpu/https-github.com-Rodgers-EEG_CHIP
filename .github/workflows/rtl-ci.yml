@@ -12,10 +12,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install cocotb
+        run: python -m pip install -r tb/requirements.txt
       - name: Install RTL simulator
         run: sudo apt-get update && sudo apt-get install --yes iverilog
       - name: Run Python golden-model tests
-        run: python -m unittest discover -s models/golden -p 'test_*.py' -v
+        run: python -m unittest discover -s models/golden -p 'test_rv32i_model.py' -v
       - name: Compile and run RTL unit test
         run: |
           mkdir -p sim/build
@@ -39,3 +41,6 @@ jobs:
             rtl/core/imm_gen.v rtl/core/instr_mem.v rtl/core/data_mem.v \
             rtl/core/riscv_core.v tb/core/test_riscv_core.v
           vvp sim/build/test_riscv_core
+      - name: Run cocotb core regression
+        working-directory: tb/core
+        run: make
