@@ -78,3 +78,40 @@ async def test_core_matches_golden_model(dut):
         assert actual == model.registers[register], f"x{register}: {actual:#x} != {model.registers[register]:#x}"
     assert int(dut.register_file.registers[0].value) == 0
     assert int(dut.data_memory.memory[0x100].value) == model.memory[0x100]
+
+
+@cocotb.test()
+async def test_core_load_store_widths_and_shifts(dut):
+    program = [
+        i_type(0x200, 0, 0, 1),
+        i_type(-1, 0, 0, 2),
+        s_type(0, 2, 1, 0),
+        i_type(0, 1, 0, 3, 0x03),
+        i_type(0, 1, 4, 4, 0x03),
+        s_type(2, 2, 1, 1),
+        i_type(2, 1, 1, 5, 0x03),
+        i_type(2, 1, 5, 6, 0x03),
+        i_type(1, 0, 0, 7),
+        i_type(4, 7, 1, 8),
+        i_type(2, 8, 5, 9),
+        i_type(0x404, 2, 5, 10),
+        i_type(-2, 2, 2, 11),
+    ]
+    model = RV32IModel(program)
+    clock = Clock(dut.clk, 10, units="ns")
+    cocotb.start_soon(clock.start())
+    await write_program(dut, program)
+    dut.reset.value = 1
+    await Timer(12, units="ns")
+    dut.reset.value = 0
+
+    for _ in range(len(program)):
+        model.step()
+        await RisingEdge(dut.clk)
+
+    await Timer(1, units="ns")
+    for register in range(1, 12):
+        actual = int(dut.register_file.registers[register].value)
+        assert actual == model.registers[register], f"x{register}: {actual:#x} != {model.registers[register]:#x}"
+    for address in (0x200, 0x202, 0x203):
+        assert int(dut.data_memory.memory[address].value) == model.memory[address]
