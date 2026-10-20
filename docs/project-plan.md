@@ -72,3 +72,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Compliance-style control-flow coverage for all branch conditions, `LUI`, `AUIPC`, `JAL`, and `JALR`
 - Phase 2 Wishbone-style interconnect decoder with memory, accelerator, DMA, and unmapped-error routes
 - Wishbone RAM target with byte enables, little-endian access, acknowledge, and error responses
+- CPU-facing Wishbone master bridge with latched requests and one-shot completion responses

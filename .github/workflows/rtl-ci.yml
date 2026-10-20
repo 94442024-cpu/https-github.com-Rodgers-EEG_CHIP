@@ -54,3 +54,8 @@ jobs:
           iverilog -g2012 -o sim/build/test_wishbone_ram \
             rtl/bus/wishbone_ram.v tb/bus/test_wishbone_ram.v
           vvp sim/build/test_wishbone_ram
+      - name: Compile and run Wishbone master bridge test
+        run: |
+          iverilog -g2012 -o sim/build/test_wishbone_master_bridge \
+            rtl/bus/wishbone_master_bridge.v tb/bus/test_wishbone_master_bridge.v
+          vvp sim/build/test_wishbone_master_bridge
