@@ -68,3 +68,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Separate instruction/data memories and an integrated single-cycle `riscv_core` smoke-test target
 - Cocotb core regression scaffolded to compare DUT registers and memory against the Python model
 - Cocotb coverage for byte/halfword access widths, sign/zero extension, and immediate shifts
+- Deterministic randomized differential test covering arithmetic, shifts, and aligned memory operations

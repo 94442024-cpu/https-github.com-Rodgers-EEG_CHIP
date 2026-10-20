@@ -1,3 +1,4 @@
+import random
 import sys
 from pathlib import Path
 
@@ -114,4 +115,58 @@ async def test_core_load_store_widths_and_shifts(dut):
         actual = int(dut.register_file.registers[register].value)
         assert actual == model.registers[register], f"x{register}: {actual:#x} != {model.registers[register]:#x}"
     for address in (0x200, 0x202, 0x203):
+        assert int(dut.data_memory.memory[address].value) == model.memory[address]
+
+
+@cocotb.test()
+async def test_core_randomized_differential(dut):
+    generator = random.Random(20261020)
+    program = [i_type(0x300, 0, 0, 20)]
+    for register in range(1, 16):
+        program.append(i_type(register - 8, 0, 0, register))
+
+    touched_addresses = set()
+    for _ in range(80):
+        operation = generator.randrange(6)
+        destination = generator.randrange(1, 16)
+        source = generator.randrange(1, 16)
+        second_source = generator.randrange(1, 16)
+        if operation == 0:
+            program.append(i_type(generator.randrange(-32, 32), source, 0, destination))
+        elif operation == 1:
+            program.append(r_type(0, second_source, source, generator.choice((0, 4, 6, 7)), destination))
+        elif operation == 2:
+            program.append(r_type(0, second_source, source, generator.choice((1, 2, 3, 5)), destination))
+        elif operation == 3:
+            shift = generator.randrange(32)
+            funct7 = generator.choice((0, 0x20))
+            program.append(i_type((funct7 << 5) | shift, source, 5, destination))
+        else:
+            width = generator.choice((0, 1, 2))
+            offsets = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12) if width == 0 else (0, 2, 4, 6, 8, 10, 12) if width == 1 else (0, 4, 8, 12)
+            offset = generator.choice(offsets)
+            program.append(s_type(offset, source, 20, width))
+            touched_addresses.update(range(0x300 + offset, 0x300 + offset + (1 if width == 0 else 2 if width == 1 else 4)))
+            load_destination = generator.randrange(1, 16)
+            load_funct3 = (0, 1, 2)[width]
+            program.append(i_type(offset, 20, load_funct3, load_destination, 0x03))
+
+    model = RV32IModel(program)
+    clock = Clock(dut.clk, 10, units="ns")
+    cocotb.start_soon(clock.start())
+    await write_program(dut, program)
+    dut.reset.value = 1
+    await Timer(12, units="ns")
+    dut.reset.value = 0
+
+    for _ in range(len(program)):
+        model.step()
+        await RisingEdge(dut.clk)
+
+    await Timer(1, units="ns")
+    for register in range(1, 21):
+        actual = int(dut.register_file.registers[register].value)
+        assert actual == model.registers[register], f"x{register}: {actual:#x} != {model.registers[register]:#x}"
+    assert int(dut.register_file.registers[0].value) == 0
+    for address in touched_addresses:
         assert int(dut.data_memory.memory[address].value) == model.memory[address]
