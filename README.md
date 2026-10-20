@@ -50,3 +50,21 @@ The initial verification flow is intended to use:
 - RISC-V GCC for compiled software tests
 
 Tool versions and exact commands will be pinned as the project becomes executable.
+
+### Windows Setup
+
+The verified local setup uses Python 3.12, Icarus Verilog 12, GNU Make 4.4.1, and cocotb 1.9.2.
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r tb\requirements.txt
+```
+
+Run the Python reference tests with:
+
+```powershell
+python -m unittest discover -s models/golden -p 'test_rv32i_model.py' -v
+```
+
+Run the local cocotb regression on Windows with the `cocotb-test` runner, or use the Makefile in a Unix-like shell. GitHub Actions runs the Makefile on Ubuntu.

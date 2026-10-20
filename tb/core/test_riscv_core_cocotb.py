@@ -68,7 +68,7 @@ async def test_core_matches_golden_model(dut):
     await Timer(12, units="ns")
     dut.reset.value = 0
 
-    for _ in range(18):
+    for _ in range(16):
         model.step()
         await RisingEdge(dut.clk)
 

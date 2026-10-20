@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module riscv_core #(
     parameter INSTRUCTION_WORDS = 1024,
     parameter DATA_BYTES = 4096
