@@ -22,3 +22,8 @@ jobs:
           iverilog -g2012 -o sim/build/test_alu_regfile \
             rtl/core/alu.v rtl/core/regfile.v tb/core/test_alu_regfile.v
           vvp sim/build/test_alu_regfile
+      - name: Compile and run control-unit test
+        run: |
+          iverilog -g2012 -o sim/build/test_control \
+            rtl/core/control.v tb/core/test_control.v
+          vvp sim/build/test_control
