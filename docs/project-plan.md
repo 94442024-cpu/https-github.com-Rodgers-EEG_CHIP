@@ -10,7 +10,7 @@ Build and verify a RISC-V-hosted SoC that accelerates convolution/FIR filtering 
 
 - [x] Create repository structure and development rules
 - [ ] Select and document simulator/tool versions
-- [ ] Add the first Python golden-model conventions
+- [x] Add the first Python golden-model conventions
 - [ ] Add continuous-integration checks
 
 ### Phase 1: RV32I Host Core
@@ -57,3 +57,8 @@ Build and verify a RISC-V-hosted SoC that accelerates convolution/FIR filtering 
 ## Verification Strategy
 
 Every module follows the sequence: Python reference behavior, directed tests, randomized tests, integration regression, and representative EEG data where applicable.
+
+## Completed Milestones
+
+- RV32I Python reference model with arithmetic, memory, branch, jump, and register-zero semantics
+- Focused unit tests for arithmetic, `x0`, little-endian loads/stores, sign/zero extension, and taken branches
