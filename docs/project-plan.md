@@ -71,3 +71,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Deterministic randomized differential test covering arithmetic, shifts, and aligned memory operations
 - Compliance-style control-flow coverage for all branch conditions, `LUI`, `AUIPC`, `JAL`, and `JALR`
 - Phase 2 Wishbone-style interconnect decoder with memory, accelerator, DMA, and unmapped-error routes
+- Wishbone RAM target with byte enables, little-endian access, acknowledge, and error responses

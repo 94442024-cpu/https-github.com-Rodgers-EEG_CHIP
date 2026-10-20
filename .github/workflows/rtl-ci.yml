@@ -49,3 +49,8 @@ jobs:
           iverilog -g2012 -o sim/build/test_wishbone_interconnect \
             rtl/bus/wishbone_interconnect.v tb/bus/test_wishbone_interconnect.v
           vvp sim/build/test_wishbone_interconnect
+      - name: Compile and run Wishbone RAM test
+        run: |
+          iverilog -g2012 -o sim/build/test_wishbone_ram \
+            rtl/bus/wishbone_ram.v tb/bus/test_wishbone_ram.v
+          vvp sim/build/test_wishbone_ram
