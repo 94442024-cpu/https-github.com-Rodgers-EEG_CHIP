@@ -44,3 +44,8 @@ jobs:
       - name: Run cocotb core regression
         working-directory: tb/core
         run: make
+      - name: Compile and run bus interconnect test
+        run: |
+          iverilog -g2012 -o sim/build/test_wishbone_interconnect \
+            rtl/bus/wishbone_interconnect.v tb/bus/test_wishbone_interconnect.v
+          vvp sim/build/test_wishbone_interconnect

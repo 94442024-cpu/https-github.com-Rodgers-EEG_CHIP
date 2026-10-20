@@ -70,3 +70,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Cocotb coverage for byte/halfword access widths, sign/zero extension, and immediate shifts
 - Deterministic randomized differential test covering arithmetic, shifts, and aligned memory operations
 - Compliance-style control-flow coverage for all branch conditions, `LUI`, `AUIPC`, `JAL`, and `JALR`
+- Phase 2 Wishbone-style interconnect decoder with memory, accelerator, DMA, and unmapped-error routes

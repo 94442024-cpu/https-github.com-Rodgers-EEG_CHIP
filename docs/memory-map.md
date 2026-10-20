@@ -17,7 +17,17 @@ Data memory is little-endian. Naturally aligned byte, halfword, and word accesse
 
 ## Future Integrated Map
 
-The final system address map will be defined when the bus is added. It must reserve non-overlapping regions for:
+The Phase 2 Wishbone decoder reserves these non-overlapping regions:
+
+| Region | Address range | Initial function |
+|---|---|---|
+| Main memory | `0x00000000`-`0x0000FFFF` | Instruction/data memory target |
+| Accelerator | `0x40000000`-`0x40000FFF` | Convolution accelerator registers/data |
+| DMA controller | `0x40001000`-`0x40001FFF` | DMA control/status registers |
+
+Unmapped addresses return a bus error. The final system address map may refine the memory window, but the peripheral regions are reserved now so software interfaces remain stable.
+
+The integrated system must provide non-overlapping regions for:
 
 - Instruction/data memory
 - Convolution accelerator registers and data ports
