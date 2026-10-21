@@ -77,3 +77,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Memory-mapped accelerator register block connected and controlled by the RISC-V system test
 - Four-tap signed convolution golden model and matching memory-mapped RTL accumulation
 - Streaming four-sample window datapath with valid/ready output timing
+- Bus-configured coefficients connected to the streaming accelerator wrapper

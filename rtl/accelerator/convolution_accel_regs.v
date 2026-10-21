@@ -9,7 +9,11 @@ module convolution_accel_regs (
     input  wire [3:0]  sel_i,
     output reg  [31:0] dat_o,
     output wire        ack_o,
-    output wire        err_o
+    output wire        err_o,
+    output wire [31:0] coeff0_o,
+    output wire [31:0] coeff1_o,
+    output wire [31:0] coeff2_o,
+    output wire [31:0] coeff3_o
 );
     localparam ADDR_CONTROL = 12'h000;
     localparam ADDR_STATUS = 12'h004;
@@ -39,6 +43,10 @@ module convolution_accel_regs (
 
     assign ack_o = request && address_valid;
     assign err_o = request && !address_valid;
+    assign coeff0_o = coeff_regs[0];
+    assign coeff1_o = coeff_regs[1];
+    assign coeff2_o = coeff_regs[2];
+    assign coeff3_o = coeff_regs[3];
 
     always @* begin
         case (adr_i)
