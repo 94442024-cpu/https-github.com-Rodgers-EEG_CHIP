@@ -26,3 +26,13 @@ def convolution_window(samples: list[int], coefficients: list[int], start: int =
     if len(window) != len(coefficients):
         raise ValueError("window extends beyond the sample buffer")
     return convolve(window, coefficients)
+
+
+def stream_convolution(samples: list[int], coefficients: list[int]) -> list[int]:
+    if len(coefficients) == 0:
+        raise ValueError("coefficients must not be empty")
+    outputs = []
+    for end in range(len(coefficients), len(samples) + 1):
+        window = list(reversed(samples[end - len(coefficients) : end]))
+        outputs.append(convolve(window, coefficients))
+    return outputs

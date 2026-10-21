@@ -54,3 +54,7 @@ Offsets are relative to `0x40000000`:
 | `0x28` | COEFF3 | Signed 32-bit coefficient, tap 3 |
 
 The initial register block performs a one-cycle four-tap signed accumulation. The streaming and DMA versions will preserve this register contract where practical.
+
+## Streaming Interface
+
+The standalone streaming datapath accepts one signed 32-bit sample whenever `sample_valid_i` and `sample_ready_o` are high. It keeps the newest sample at tap zero and emits `result_valid_o` after the fourth sample and for every subsequent sample. Coefficients are supplied as four signed 32-bit inputs.

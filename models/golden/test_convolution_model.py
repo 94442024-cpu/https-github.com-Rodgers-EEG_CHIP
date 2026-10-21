@@ -1,6 +1,6 @@
 import unittest
 
-from convolution_model import convolve, convolution_window, to_s32, to_u32
+from convolution_model import convolve, convolution_window, stream_convolution, to_s32, to_u32
 
 
 class ConvolutionModelTests(unittest.TestCase):
@@ -16,6 +16,9 @@ class ConvolutionModelTests(unittest.TestCase):
         samples = [1, 2, 3, 4, 5, 6]
         coefficients = [2, -1, 3]
         self.assertEqual(convolution_window(samples, coefficients, start=1), 13)
+
+    def test_streaming_window_outputs_newest_sample_at_tap_zero(self):
+        self.assertEqual(stream_convolution([1, 2, 3, 4, 5], [1, 2, 3, 4]), [20, 30])
 
     def test_rejects_mismatched_lengths(self):
         with self.assertRaises(ValueError):

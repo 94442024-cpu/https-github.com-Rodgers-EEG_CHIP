@@ -76,3 +76,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - External-data-bus RISC-V mode connected through the bridge, decoder, and RAM in a system smoke test
 - Memory-mapped accelerator register block connected and controlled by the RISC-V system test
 - Four-tap signed convolution golden model and matching memory-mapped RTL accumulation
+- Streaming four-sample window datapath with valid/ready output timing
