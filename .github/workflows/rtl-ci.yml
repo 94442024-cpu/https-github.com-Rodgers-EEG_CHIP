@@ -77,6 +77,11 @@ jobs:
             rtl/accelerator/convolution_accel_regs.v rtl/accelerator/convolution_stream.v \
             rtl/accelerator/convolution_accelerator.v tb/bus/test_convolution_accelerator.v
           vvp sim/build/test_convolution_accelerator
+      - name: Compile and run DMA controller test
+        run: |
+          iverilog -g2012 -o sim/build/test_dma_controller \
+            rtl/bus/dma_controller.v tb/bus/test_dma_controller.v
+          vvp sim/build/test_dma_controller
       - name: Compile and run RISC-V Wishbone system test
         run: |
           iverilog -g2012 -o sim/build/test_riscv_wb_system \

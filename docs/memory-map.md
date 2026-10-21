@@ -58,3 +58,15 @@ The initial register block performs a one-cycle four-tap signed accumulation. Th
 ## Streaming Interface
 
 The streaming datapath accepts one signed 32-bit sample whenever `sample_valid_i` and `sample_ready_o` are high. It keeps the newest sample at tap zero and emits `result_valid_o` after the fourth sample and for every subsequent sample. Coefficients are supplied as four signed 32-bit inputs.
+
+## DMA Registers
+
+Offsets are relative to `0x40001000`:
+
+| Offset | Register | Description |
+|---:|---|---|
+| `0x00` | CONTROL | Write bit 0 to start; bit 1 clears done; bit 2 clears error |
+| `0x04` | STATUS | Bit 0 busy, bit 1 done, bit 2 error |
+| `0x08` | SOURCE | Source byte address |
+| `0x0C` | DESTINATION | Destination byte address |
+| `0x10` | LENGTH | Transfer length in bytes; Phase 1 supports aligned word multiples |
