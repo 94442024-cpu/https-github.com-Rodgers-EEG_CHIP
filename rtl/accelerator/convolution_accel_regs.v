@@ -10,6 +10,7 @@ module convolution_accel_regs (
     output reg  [31:0] dat_o,
     output wire        ack_o,
     output wire        err_o,
+    output wire        irq_o,
     output wire [31:0] coeff0_o,
     output wire [31:0] coeff1_o,
     output wire [31:0] coeff2_o,
@@ -43,6 +44,7 @@ module convolution_accel_regs (
 
     assign ack_o = request && address_valid;
     assign err_o = request && !address_valid;
+    assign irq_o = done_reg;
     assign coeff0_o = coeff_regs[0];
     assign coeff1_o = coeff_regs[1];
     assign coeff2_o = coeff_regs[2];

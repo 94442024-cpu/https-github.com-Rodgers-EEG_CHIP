@@ -19,6 +19,15 @@ module riscv_wb_system #(
     wire [31:0] wb_adr, wb_dat_o, wb_dat_i;
     wire [3:0] wb_sel;
     wire wb_ack, wb_err;
+    wire bus_cyc, bus_stb, bus_we;
+    wire [31:0] bus_adr, bus_dat_o, bus_dat_i;
+    wire [3:0] bus_sel;
+    wire bus_ack, bus_err;
+    wire dma_bus_ack, dma_bus_err;
+    wire [31:0] dma_master_dat_i;
+    wire dma_master_cyc, dma_master_stb, dma_master_we;
+    wire [31:0] dma_master_adr, dma_master_dat_o;
+    wire [3:0] dma_master_sel;
 
     wire memory_cyc, memory_stb, memory_we;
     wire [31:0] memory_adr, memory_dat_o, memory_dat_i;
@@ -33,6 +42,16 @@ module riscv_wb_system #(
     wire dma_cyc, dma_stb, dma_we;
     wire [31:0] dma_adr, dma_dat_o;
     wire [3:0] dma_sel;
+    wire [31:0] dma_dat_i;
+    wire dma_ack, dma_err;
+    wire dma_irq;
+
+    wire interrupt_cyc, interrupt_stb, interrupt_we;
+    wire [31:0] interrupt_adr, interrupt_dat_o;
+    wire [3:0] interrupt_sel;
+    wire [31:0] interrupt_dat_i;
+    wire interrupt_ack, interrupt_err;
+    wire accelerator_irq;
 
     riscv_core #(
         .INSTRUCTION_WORDS(INSTRUCTION_WORDS),
@@ -56,10 +75,33 @@ module riscv_wb_system #(
         .wb_dat_i(wb_dat_i), .wb_ack_i(wb_ack), .wb_err_i(wb_err)
     );
 
+    dma_controller dma (
+        .clk(clk), .rst(reset), .cyc_i(dma_cyc), .stb_i(dma_stb), .we_i(dma_we),
+        .adr_i(dma_adr[11:0]), .dat_i(dma_dat_o), .sel_i(dma_sel), .dat_o(dma_dat_i),
+        .ack_o(dma_ack), .err_o(dma_err), .irq_o(dma_irq), .master_cyc_o(dma_master_cyc),
+        .master_stb_o(dma_master_stb), .master_we_o(dma_master_we),
+        .master_adr_o(dma_master_adr), .master_dat_o(dma_master_dat_o),
+        .master_sel_o(dma_master_sel), .master_dat_i(dma_master_dat_i),
+        .master_ack_i(dma_bus_ack), .master_err_i(dma_bus_err)
+    );
+
+    wishbone_bus_arbiter bus_arbiter (
+        .clk(clk), .rst(reset),
+        .cpu_cyc_i(wb_cyc), .cpu_stb_i(wb_stb), .cpu_we_i(wb_we),
+        .cpu_adr_i(wb_adr), .cpu_dat_i(wb_dat_o), .cpu_sel_i(wb_sel),
+        .cpu_dat_o(wb_dat_i), .cpu_ack_o(wb_ack), .cpu_err_o(wb_err),
+        .dma_cyc_i(dma_master_cyc), .dma_stb_i(dma_master_stb), .dma_we_i(dma_master_we),
+        .dma_adr_i(dma_master_adr), .dma_dat_i(dma_master_dat_o), .dma_sel_i(dma_master_sel),
+        .dma_dat_o(dma_master_dat_i), .dma_ack_o(dma_bus_ack), .dma_err_o(dma_bus_err),
+        .bus_cyc_o(bus_cyc), .bus_stb_o(bus_stb), .bus_we_o(bus_we),
+        .bus_adr_o(bus_adr), .bus_dat_o(bus_dat_o), .bus_sel_o(bus_sel),
+        .bus_dat_i(bus_dat_i), .bus_ack_i(bus_ack), .bus_err_i(bus_err)
+    );
+
     wishbone_interconnect bus_decoder (
-        .master_cyc_i(wb_cyc), .master_stb_i(wb_stb), .master_we_i(wb_we),
-        .master_adr_i(wb_adr), .master_dat_i(wb_dat_o), .master_sel_i(wb_sel),
-        .master_dat_o(wb_dat_i), .master_ack_o(wb_ack), .master_err_o(wb_err),
+        .master_cyc_i(bus_cyc), .master_stb_i(bus_stb), .master_we_i(bus_we),
+        .master_adr_i(bus_adr), .master_dat_i(bus_dat_o), .master_sel_i(bus_sel),
+        .master_dat_o(bus_dat_i), .master_ack_o(bus_ack), .master_err_o(bus_err),
         .memory_cyc_o(memory_cyc), .memory_stb_o(memory_stb), .memory_we_o(memory_we),
         .memory_adr_o(memory_adr), .memory_dat_o(memory_dat_o), .memory_sel_o(memory_sel),
         .memory_dat_i(memory_dat_i), .memory_ack_i(memory_ack), .memory_err_i(memory_err),
@@ -70,14 +112,27 @@ module riscv_wb_system #(
         .accelerator_err_i(accelerator_err),
         .dma_cyc_o(dma_cyc), .dma_stb_o(dma_stb), .dma_we_o(dma_we), .dma_adr_o(dma_adr),
         .dma_dat_o(dma_dat_o), .dma_sel_o(dma_sel),
-        .dma_dat_i(32'd0), .dma_ack_i(1'b0), .dma_err_i(1'b0)
+        .dma_dat_i(dma_dat_i), .dma_ack_i(dma_ack), .dma_err_i(dma_err),
+        .interrupt_cyc_o(interrupt_cyc), .interrupt_stb_o(interrupt_stb),
+        .interrupt_we_o(interrupt_we), .interrupt_adr_o(interrupt_adr),
+        .interrupt_dat_o(interrupt_dat_o), .interrupt_sel_o(interrupt_sel),
+        .interrupt_dat_i(interrupt_dat_i), .interrupt_ack_i(interrupt_ack),
+        .interrupt_err_i(interrupt_err)
+    );
+
+    interrupt_controller interrupt_block (
+        .clk(clk), .rst(reset),
+        .cyc_i(interrupt_cyc), .stb_i(interrupt_stb), .we_i(interrupt_we),
+        .adr_i(interrupt_adr[11:0]), .dat_i(interrupt_dat_o), .sel_i(interrupt_sel),
+        .dat_o(interrupt_dat_i), .ack_o(interrupt_ack), .err_o(interrupt_err),
+        .irq_i({accelerator_irq, dma_irq}), .irq_o()
     );
 
     convolution_accel_regs accelerator (
         .clk(clk), .rst(reset), .cyc_i(accelerator_cyc), .stb_i(accelerator_stb),
         .we_i(accelerator_we), .adr_i(accelerator_adr[11:0]), .dat_i(accelerator_dat_o),
         .sel_i(accelerator_sel), .dat_o(accelerator_dat_i), .ack_o(accelerator_ack),
-        .err_o(accelerator_err)
+        .err_o(accelerator_err), .irq_o(accelerator_irq)
     );
 
     wishbone_ram #(.BYTES(DATA_BYTES)) memory_target (

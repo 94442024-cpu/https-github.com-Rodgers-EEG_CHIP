@@ -24,6 +24,7 @@ The Phase 2 Wishbone decoder reserves these non-overlapping regions:
 | Main memory | `0x00000000`-`0x0000FFFF` | Instruction/data memory target |
 | Accelerator | `0x40000000`-`0x40000FFF` | Convolution accelerator registers/data |
 | DMA controller | `0x40001000`-`0x40001FFF` | DMA control/status registers |
+| Interrupt controller | `0x40002000`-`0x40002FFF` | Interrupt pending/mask/clear registers |
 
 Unmapped addresses return a bus error. The final system address map may refine the memory window, but the peripheral regions are reserved now so software interfaces remain stable.
 
@@ -70,3 +71,16 @@ Offsets are relative to `0x40001000`:
 | `0x08` | SOURCE | Source byte address |
 | `0x0C` | DESTINATION | Destination byte address |
 | `0x10` | LENGTH | Transfer length in bytes; Phase 1 supports aligned word multiples |
+
+## Interrupt Controller Registers
+
+Offsets are relative to `0x40002000`:
+
+| Offset | Register | Description |
+|---:|---|---|
+| `0x00` | PENDING | Read-only pending interrupt flags |
+| `0x04` | MASK | Per-source interrupt mask; 0 disables, 1 enables |
+| `0x08` | CLEAR | Write 1 to clear the corresponding pending bit |
+| `0x0C` | STATUS | Read-only combined mask-enabled interrupt state |
+
+The current implementation exposes two interrupt sources, shared by the DMA and accelerator completion paths. The CPU can read the pending state and suppress selected events with a mask word, while writing to the clear register acknowledges them.

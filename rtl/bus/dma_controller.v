@@ -10,6 +10,7 @@ module dma_controller (
     output reg  [31:0] dat_o,
     output wire        ack_o,
     output wire        err_o,
+    output wire        irq_o,
 
     output wire        master_cyc_o,
     output wire        master_stb_o,
@@ -47,6 +48,7 @@ module dma_controller (
 
     assign ack_o = request && address_valid;
     assign err_o = request && !address_valid;
+    assign irq_o = done_reg;
 
     assign master_cyc_o = (state == STATE_READ) || (state == STATE_WRITE);
     assign master_stb_o = master_cyc_o;

@@ -79,3 +79,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Streaming four-sample window datapath with valid/ready output timing
 - Bus-configured coefficients connected to the streaming accelerator wrapper
 - Word-granular DMA controller with source, destination, length, status, and error registers
+- Two-source interrupt controller with pending, mask, clear, and system completion wiring
