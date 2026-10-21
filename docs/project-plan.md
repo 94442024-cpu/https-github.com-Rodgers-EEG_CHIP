@@ -74,3 +74,4 @@ Every module follows the sequence: Python reference behavior, directed tests, ra
 - Wishbone RAM target with byte enables, little-endian access, acknowledge, and error responses
 - CPU-facing Wishbone master bridge with latched requests and one-shot completion responses
 - External-data-bus RISC-V mode connected through the bridge, decoder, and RAM in a system smoke test
+- Memory-mapped accelerator register block connected and controlled by the RISC-V system test

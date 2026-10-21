@@ -59,6 +59,11 @@ jobs:
           iverilog -g2012 -o sim/build/test_wishbone_master_bridge \
             rtl/bus/wishbone_master_bridge.v tb/bus/test_wishbone_master_bridge.v
           vvp sim/build/test_wishbone_master_bridge
+      - name: Compile and run accelerator register test
+        run: |
+          iverilog -g2012 -o sim/build/test_convolution_accel_regs \
+            rtl/accelerator/convolution_accel_regs.v tb/bus/test_convolution_accel_regs.v
+          vvp sim/build/test_convolution_accel_regs
       - name: Compile and run RISC-V Wishbone system test
         run: |
           iverilog -g2012 -o sim/build/test_riscv_wb_system \

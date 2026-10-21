@@ -34,3 +34,17 @@ The integrated system must provide non-overlapping regions for:
 - DMA controller registers
 - Interrupt controller
 - Any debug or status peripherals
+
+## Accelerator Registers
+
+Offsets are relative to `0x40000000`:
+
+| Offset | Register | Description |
+|---:|---|---|
+| `0x00` | CONTROL | Write bit 0 to start; readback of control bits |
+| `0x04` | STATUS | Bit 0 busy, bit 1 done; write bit 0 to clear done |
+| `0x08` | SAMPLE_IN | Signed 32-bit input sample |
+| `0x0C` | COEFF | Signed 32-bit coefficient |
+| `0x10` | RESULT | Signed 32-bit result |
+
+The initial register block uses a one-cycle signed multiply as a datapath placeholder. The multi-tap convolution engine will preserve this register contract.

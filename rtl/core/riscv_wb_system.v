@@ -28,6 +28,8 @@ module riscv_wb_system #(
     wire accelerator_cyc, accelerator_stb, accelerator_we;
     wire [31:0] accelerator_adr, accelerator_dat_o;
     wire [3:0] accelerator_sel;
+    wire [31:0] accelerator_dat_i;
+    wire accelerator_ack, accelerator_err;
     wire dma_cyc, dma_stb, dma_we;
     wire [31:0] dma_adr, dma_dat_o;
     wire [3:0] dma_sel;
@@ -64,10 +66,18 @@ module riscv_wb_system #(
         .accelerator_cyc_o(accelerator_cyc), .accelerator_stb_o(accelerator_stb),
         .accelerator_we_o(accelerator_we), .accelerator_adr_o(accelerator_adr),
         .accelerator_dat_o(accelerator_dat_o), .accelerator_sel_o(accelerator_sel),
-        .accelerator_dat_i(32'd0), .accelerator_ack_i(1'b0), .accelerator_err_i(1'b0),
+        .accelerator_dat_i(accelerator_dat_i), .accelerator_ack_i(accelerator_ack),
+        .accelerator_err_i(accelerator_err),
         .dma_cyc_o(dma_cyc), .dma_stb_o(dma_stb), .dma_we_o(dma_we), .dma_adr_o(dma_adr),
         .dma_dat_o(dma_dat_o), .dma_sel_o(dma_sel),
         .dma_dat_i(32'd0), .dma_ack_i(1'b0), .dma_err_i(1'b0)
+    );
+
+    convolution_accel_regs accelerator (
+        .clk(clk), .rst(reset), .cyc_i(accelerator_cyc), .stb_i(accelerator_stb),
+        .we_i(accelerator_we), .adr_i(accelerator_adr[11:0]), .dat_i(accelerator_dat_o),
+        .sel_i(accelerator_sel), .dat_o(accelerator_dat_i), .ack_o(accelerator_ack),
+        .err_o(accelerator_err)
     );
 
     wishbone_ram #(.BYTES(DATA_BYTES)) memory_target (
