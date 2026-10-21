@@ -43,8 +43,14 @@ Offsets are relative to `0x40000000`:
 |---:|---|---|
 | `0x00` | CONTROL | Write bit 0 to start; readback of control bits |
 | `0x04` | STATUS | Bit 0 busy, bit 1 done; write bit 0 to clear done |
-| `0x08` | SAMPLE_IN | Signed 32-bit input sample |
-| `0x0C` | COEFF | Signed 32-bit coefficient |
+| `0x08` | SAMPLE0 | Signed 32-bit input sample, tap 0 |
+| `0x0C` | COEFF0 | Signed 32-bit coefficient, tap 0 |
 | `0x10` | RESULT | Signed 32-bit result |
+| `0x14` | SAMPLE1 | Signed 32-bit input sample, tap 1 |
+| `0x18` | COEFF1 | Signed 32-bit coefficient, tap 1 |
+| `0x1C` | SAMPLE2 | Signed 32-bit input sample, tap 2 |
+| `0x20` | COEFF2 | Signed 32-bit coefficient, tap 2 |
+| `0x24` | SAMPLE3 | Signed 32-bit input sample, tap 3 |
+| `0x28` | COEFF3 | Signed 32-bit coefficient, tap 3 |
 
-The initial register block uses a one-cycle signed multiply as a datapath placeholder. The multi-tap convolution engine will preserve this register contract.
+The initial register block performs a one-cycle four-tap signed accumulation. The streaming and DMA versions will preserve this register contract where practical.

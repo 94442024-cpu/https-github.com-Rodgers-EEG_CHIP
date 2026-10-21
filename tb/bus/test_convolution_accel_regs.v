@@ -66,10 +66,16 @@ module test_convolution_accel_regs;
 
         write_register(12'h008, 32'd3);
         write_register(12'h00C, -32'sd4);
+        write_register(12'h014, -32'sd2);
+        write_register(12'h018, 32'd6);
+        write_register(12'h01C, 32'd5);
+        write_register(12'h020, 32'd2);
+        write_register(12'h024, 32'd1);
+        write_register(12'h028, -32'sd3);
         write_register(12'h000, 32'd1);
         @(negedge clk);
         read_register(12'h004, 32'h00000002);
-        read_register(12'h010, 32'hFFFFFFF4);
+        read_register(12'h010, 32'hFFFFFFEF);
 
         @(negedge clk);
         adr_i = 12'h100;

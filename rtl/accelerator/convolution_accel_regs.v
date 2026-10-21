@@ -16,17 +16,26 @@ module convolution_accel_regs (
     localparam ADDR_SAMPLE = 12'h008;
     localparam ADDR_COEFF = 12'h00C;
     localparam ADDR_RESULT = 12'h010;
+    localparam ADDR_SAMPLE1 = 12'h014;
+    localparam ADDR_COEFF1 = 12'h018;
+    localparam ADDR_SAMPLE2 = 12'h01C;
+    localparam ADDR_COEFF2 = 12'h020;
+    localparam ADDR_SAMPLE3 = 12'h024;
+    localparam ADDR_COEFF3 = 12'h028;
 
     reg [31:0] control_reg;
-    reg [31:0] sample_reg;
-    reg [31:0] coeff_reg;
+    reg [31:0] sample_regs [0:3];
+    reg [31:0] coeff_regs [0:3];
     reg [31:0] result_reg;
     reg busy_reg;
     reg done_reg;
     wire request = cyc_i && stb_i;
     wire address_valid = (adr_i == ADDR_CONTROL) || (adr_i == ADDR_STATUS) ||
                           (adr_i == ADDR_SAMPLE) || (adr_i == ADDR_COEFF) ||
-                          (adr_i == ADDR_RESULT);
+                          (adr_i == ADDR_RESULT) || (adr_i == ADDR_SAMPLE1) ||
+                          (adr_i == ADDR_COEFF1) || (adr_i == ADDR_SAMPLE2) ||
+                          (adr_i == ADDR_COEFF2) || (adr_i == ADDR_SAMPLE3) ||
+                          (adr_i == ADDR_COEFF3);
 
     assign ack_o = request && address_valid;
     assign err_o = request && !address_valid;
@@ -35,9 +44,15 @@ module convolution_accel_regs (
         case (adr_i)
             ADDR_CONTROL: dat_o = control_reg;
             ADDR_STATUS: dat_o = {30'd0, done_reg, busy_reg};
-            ADDR_SAMPLE: dat_o = sample_reg;
-            ADDR_COEFF: dat_o = coeff_reg;
+            ADDR_SAMPLE: dat_o = sample_regs[0];
+            ADDR_COEFF: dat_o = coeff_regs[0];
             ADDR_RESULT: dat_o = result_reg;
+            ADDR_SAMPLE1: dat_o = sample_regs[1];
+            ADDR_COEFF1: dat_o = coeff_regs[1];
+            ADDR_SAMPLE2: dat_o = sample_regs[2];
+            ADDR_COEFF2: dat_o = coeff_regs[2];
+            ADDR_SAMPLE3: dat_o = sample_regs[3];
+            ADDR_COEFF3: dat_o = coeff_regs[3];
             default: dat_o = 32'd0;
         endcase
     end
@@ -45,8 +60,14 @@ module convolution_accel_regs (
     always @(posedge clk) begin
         if (rst) begin
             control_reg <= 32'd0;
-            sample_reg <= 32'd0;
-            coeff_reg <= 32'd0;
+            sample_regs[0] <= 32'd0;
+            sample_regs[1] <= 32'd0;
+            sample_regs[2] <= 32'd0;
+            sample_regs[3] <= 32'd0;
+            coeff_regs[0] <= 32'd0;
+            coeff_regs[1] <= 32'd0;
+            coeff_regs[2] <= 32'd0;
+            coeff_regs[3] <= 32'd0;
             result_reg <= 32'd0;
             busy_reg <= 1'b0;
             done_reg <= 1'b0;
@@ -61,7 +82,10 @@ module convolution_accel_regs (
                     ADDR_CONTROL: begin
                         control_reg <= dat_i;
                         if (sel_i[0] && dat_i[0]) begin
-                            result_reg <= $signed(sample_reg) * $signed(coeff_reg);
+                            result_reg <= ($signed(sample_regs[0]) * $signed(coeff_regs[0])) +
+                                          ($signed(sample_regs[1]) * $signed(coeff_regs[1])) +
+                                          ($signed(sample_regs[2]) * $signed(coeff_regs[2])) +
+                                          ($signed(sample_regs[3]) * $signed(coeff_regs[3]));
                             busy_reg <= 1'b1;
                             done_reg <= 1'b0;
                         end
@@ -69,8 +93,14 @@ module convolution_accel_regs (
                     ADDR_STATUS: begin
                         if (sel_i[0] && dat_i[0]) done_reg <= 1'b0;
                     end
-                    ADDR_SAMPLE: sample_reg <= dat_i;
-                    ADDR_COEFF: coeff_reg <= dat_i;
+                    ADDR_SAMPLE: sample_regs[0] <= dat_i;
+                    ADDR_COEFF: coeff_regs[0] <= dat_i;
+                    ADDR_SAMPLE1: sample_regs[1] <= dat_i;
+                    ADDR_COEFF1: coeff_regs[1] <= dat_i;
+                    ADDR_SAMPLE2: sample_regs[2] <= dat_i;
+                    ADDR_COEFF2: coeff_regs[2] <= dat_i;
+                    ADDR_SAMPLE3: sample_regs[3] <= dat_i;
+                    ADDR_COEFF3: coeff_regs[3] <= dat_i;
                     default: begin end
                 endcase
             end

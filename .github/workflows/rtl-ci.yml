@@ -18,6 +18,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install --yes iverilog
       - name: Run Python golden-model tests
         run: python -m unittest discover -s models/golden -p 'test_rv32i_model.py' -v
+      - name: Run convolution golden-model tests
+        run: python -m unittest discover -s models/golden -p 'test_convolution_model.py' -v
       - name: Compile and run RTL unit test
         run: |
           mkdir -p sim/build
