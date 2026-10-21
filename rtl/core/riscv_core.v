@@ -2,10 +2,20 @@
 
 module riscv_core #(
     parameter INSTRUCTION_WORDS = 1024,
-    parameter DATA_BYTES = 4096
+    parameter DATA_BYTES = 4096,
+    parameter EXTERNAL_DATA_BUS = 0
 ) (
     input wire clk,
-    input wire reset
+    input wire reset,
+    output wire        data_request_o,
+    output wire        data_write_o,
+    output wire [31:0] data_address_o,
+    output wire [31:0] data_write_data_o,
+    output wire [1:0]  data_width_o,
+    output wire        data_unsigned_o,
+    input wire [31:0]  data_read_data_i,
+    input wire         data_ack_i,
+    input wire         data_err_i
 );
     localparam WB_ALU = 2'd0;
     localparam WB_MEMORY = 2'd1;
@@ -15,6 +25,7 @@ module riscv_core #(
     localparam ALU_ADD = 4'd0;
 
     reg [31:0] pc;
+    reg data_wait;
     wire [31:0] instruction;
     wire [6:0] opcode = instruction[6:0];
     wire [4:0] rd = instruction[11:7];
@@ -44,10 +55,13 @@ module riscv_core #(
     wire equal;
     wire signed_less_than;
     wire unsigned_less_than;
+    wire [31:0] internal_data_read;
     wire [31:0] data_read;
     wire [31:0] writeback_data;
     wire branch_taken;
     wire [31:0] next_pc;
+    wire data_operation;
+    wire data_complete;
     wire is_auipc = (opcode == 7'b0010111);
     wire [31:0] alu_left = is_auipc ? pc : rs1_data;
 
@@ -57,8 +71,8 @@ module riscv_core #(
 
     data_mem #(.BYTES(DATA_BYTES)) data_memory (
         .clk(clk), .address(alu_result), .write_data(rs2_data),
-        .write_enable(memory_write && valid), .access_width(memory_width),
-        .load_unsigned(load_unsigned), .read_data(data_read)
+        .write_enable(memory_write && valid && !EXTERNAL_DATA_BUS), .access_width(memory_width),
+        .load_unsigned(load_unsigned), .read_data(internal_data_read)
     );
 
     control decoder (
@@ -78,7 +92,7 @@ module riscv_core #(
     regfile register_file (
         .clk(clk), .reset(reset), .rs1_addr(rs1), .rs2_addr(rs2),
         .rs1_data(rs1_data), .rs2_data(rs2_data),
-        .write_enable(register_write && valid), .rd_addr(rd), .rd_data(writeback_data)
+        .write_enable(register_write && valid && data_complete), .rd_addr(rd), .rd_data(writeback_data)
     );
 
     alu arithmetic_logic_unit (
@@ -91,6 +105,16 @@ module riscv_core #(
     assign writeback_data = (writeback_select == WB_MEMORY) ? data_read :
                             (writeback_select == WB_PC_PLUS_4) ? (pc + 32'd4) :
                             (writeback_select == WB_IMMEDIATE) ? immediate : alu_result;
+
+    assign data_read = EXTERNAL_DATA_BUS ? data_read_data_i : internal_data_read;
+    assign data_operation = valid && (memory_write || (writeback_select == WB_MEMORY));
+    assign data_complete = !EXTERNAL_DATA_BUS || !data_operation || data_ack_i || data_err_i;
+    assign data_request_o = EXTERNAL_DATA_BUS && data_operation && !data_wait;
+    assign data_write_o = memory_write && valid;
+    assign data_address_o = alu_result;
+    assign data_write_data_o = rs2_data;
+    assign data_width_o = memory_width;
+    assign data_unsigned_o = load_unsigned;
 
     assign branch_taken = branch && (
         (branch_type == 3'b000 && equal) ||
@@ -107,8 +131,21 @@ module riscv_core #(
 
     always @(posedge clk) begin
         if (reset)
-            pc <= 32'd0;
-        else
-            pc <= next_pc;
+            begin
+                pc <= 32'd0;
+                data_wait <= 1'b0;
+            end
+        else begin
+            if (EXTERNAL_DATA_BUS) begin
+                if (data_operation && !data_wait && !data_ack_i && !data_err_i)
+                    data_wait <= 1'b1;
+                else if (data_wait && (data_ack_i || data_err_i))
+                    data_wait <= 1'b0;
+            end else begin
+                data_wait <= 1'b0;
+            end
+            if (data_complete)
+                pc <= next_pc;
+        end
     end
 endmodule
